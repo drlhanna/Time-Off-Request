@@ -1,781 +1,733 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Off Requests</title>
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGltZSBPZmYgUmVxdWVzdHMiLCJzaG9ydF9uYW1lIjoiVGltZSBPZmYiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwN0FGRiIsInRoZW1lX2NvbG9yIjoiIzAwN0FGRiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTV6TXk1dmNtY3ZNakF3TUM5emRtY2lJSGRwWkhSb1BTSmhkWFJ2SWlCb1pXbG5hSFE5SW1GMWRHOGlJSFpwWlhkQ2IzZzlJakFnTUNBeU5EQWdNalF3SWo0OFkyUnlZM1JsUGp4d1lYUm9JR1E5SW0wNE1DQXhNakJzTkRBZ05EQXROREFnTkRBdE5EQXROREJhVFRnMElERTJZekkwSURBZ05EUWdNVFlnTkRRZ05EQnNNQ0ExTmkwME5pNDJOQ0F6TWkwNE1uVjNNaTR6TkRNdElqNENQRkJoZEdnaVpEMGlUVGd3SURrMll5MHlOQzR4TmpVdE1USTFMbEoyU3pNdE1Ua3VNamczTFRjdE1UY3VOelZ6TnlBM1MwZ3hNRE03SWo0OEwzTjJaejQ9IiwiaWYiOjE5MiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
-    <meta name="theme-color" content="#007AFF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Time Off Requests">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f7;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-        }
-        
-        header {
-            background: linear-gradient(135deg, #007AFF, #5856D6);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .company-logo {
-            height: 60px;
-            width: auto;
-            background: white;
-            border-radius: 8px;
-            padding: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .company-info {
-            text-align: center;
-        }
-        
-        .company-address {
-            font-size: 12px;
-            opacity: 0.9;
-            line-height: 1.3;
-        }
-        
-        h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        
-        .tabs {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid #e0e0e0;
-            position: sticky;
-            top: 68px;
-            z-index: 99;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            color: #666;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .tab.active {
-            color: #007AFF;
-            border-bottom-color: #007AFF;
-            background: rgba(0, 122, 255, 0.05);
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 20px;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
-        }
-        
-        input, textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #007AFF;
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
-        }
-        
-        button {
-            background: linear-gradient(135deg, #007AFF, #5856D6);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            width: 100%;
-        }
-        
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
-        }
-        
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .request-card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        
-        .request-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        }
-        
-        .request-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .employee-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-approved {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-denied {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .request-details {
-            color: #666;
-            font-size: 14px;
-            margin: 5px 0;
-        }
-        
-        .admin-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .btn-approve {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            flex: 1;
-        }
-        
-        .btn-deny {
-            background: linear-gradient(135deg, #dc3545, #e83e8c);
-            flex: 1;
-        }
-        
-        .settings-section {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .settings-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .alert {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 1000;
-            min-width: 300px;
-            text-align: center;
-        }
-        
-        .alert-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-        
-        .pto-disclaimer {
-            background: #f8f9fa;
-            border-left: 4px solid #007AFF;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #495057;
-            line-height: 1.5;
-        }
-        
-        .pto-disclaimer h4 {
-            color: #007AFF;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .hours-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 8px;
-        }
-        
-        .hours-input {
-            width: 100px !important;
-            text-align: center;
-        }
-        
-        .hours-buttons {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .hours-btn {
-            background: #f8f9fa;
-            color: #495057;
-            border: 1px solid #dee2e6;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: auto;
-        }
-        
-        .hours-btn:hover {
-            background: #e9ecef;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        @media (max-width: 600px) {
-            .admin-actions {
-                flex-direction: column;
-            }
-            
-            .tabs {
-                font-size: 12px;
-            }
-            
-            .tab {
-                padding: 12px 8px;
-            }
-            
-            .hours-selector {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .hours-buttons {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-            
-            .header-logo {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .company-logo {
-                height: 50px;
-            }
-            
-            h1 {
-                font-size: 20px;
-            }
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Off Requests</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGltZSBPZmYgUmVxdWVzdHMiLCJzaG9ydF9uYW1lIjoiVGltZSBPZmYiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwN0FGRiIsInRoZW1lX2NvbG9yIjoiIzAwN0FGRiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTV6TXk1dmNtY3ZNakF3TUM5emRtY2lJSGRwWkhSb1BTSmhkWFJ2SWlCb1pXbG5hSFE5SW1GMWRHOGlJSFpwWlhkQ2IzZzlJakFnTUNBeU5EQWdNalF3SWo0OFkyUnlZM1JsUGp4d1lYUm9JR1E5SW0wNE1DQXhNakJzTkRBZ05EQXROREFnTkRBdE5EQXROREJhVFRnMElERTJZekkwSURBZ05EUWdNVFlnTkRRZ05EQnNNQ0ExTmkwME5pNDJOQ0F6TWkwNE1uVjNNaTR6TkRNdElqNENQRkJoZEdnaVpEMGlUVGd3SURrMll5MHlOQzR4TmpVdE1USTFMbUoyU3pNdE1Ua3VNamczTFRjdE1UY3VOelZ6TnlBM1MwZ3hNRE03SWo0OEwzTjJaejQ9IiwiaWYiOjE5MiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+    <meta name="theme-color" content="#007AFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Time Off Requests">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f7;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .company-logo {
+            height: 60px;
+            width: auto;
+            background: white;
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .company-info {
+            text-align: center;
+        }
+        
+        .company-address {
+            font-size: 12px;
+            opacity: 0.9;
+            line-height: 1.3;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 68px;
+            z-index: 99;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #007AFF;
+            border-bottom-color: #007AFF;
+            background: rgba(0, 122, 255, 0.05);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .request-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .employee-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-denied {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .request-details {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-approve {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            flex: 1;
+        }
+        
+        .btn-deny {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+            flex: 1;
+        }
+        
+        .settings-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .settings-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .alert {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            min-width: 300px;
+            text-align: center;
+        }
+        
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .pto-disclaimer {
+            background: #f8f9fa;
+            border-left: 4px solid #007AFF;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #495057;
+            line-height: 1.5;
+        }
+        
+        .pto-disclaimer h4 {
+            color: #007AFF;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .hours-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .hours-input {
+            width: 100px !important;
+            text-align: center;
+        }
+        
+        .hours-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .hours-btn {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: auto;
+        }
+        
+        .hours-btn:hover {
+            background: #e9ecef;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        @media (max-width: 600px) {
+            .admin-actions {
+                flex-direction: column;
+            }
+            
+            .tabs {
+                font-size: 12px;
+            }
+            
+            .tab {
+                padding: 12px 8px;
+            }
+            
+            .hours-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .hours-buttons {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .header-logo {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .company-logo {
+                height: 50px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="header-logo">
-                <svg class="company-logo" version="1.1" id="svg1" width="504.50668" height="113.33333" viewBox="0 0 504.50668 113.33333" xmlns="http://www.w3.org/2000/svg">
-                    <g id="g1">
-                        <path id="path1" d="m 3782.73,86.0234 c -39.14,68.2926 -103.56,99.8826 -165.61,127.2576 -64.07,26.582 -134.75,46.555 -225.87,64.512 -196.38,59.504 -1201.07,101.113 -1200.63,99.641 0.06,0.75 -250.89,9.129 -525.78,29.968 -137.29,10.996 -280.82,26.203 -399.59,51.922 -117.33,22.071 -215.73,73.547 -223.08,114.453 0.13,48.45 39.55,64.414 70.74,41.489 9.06,-13.977 -43.35,-34.094 -71.36,-31.692 -67.081,-1.172 -130.784,17.578 -202.878,44.453 69.805,-32.519 132.183,-56.511 203.098,-58.757 17.7,0.32 35.94,1.421 54.36,7.695 12.13,4.773 52.09,20.555 27.03,53.191 -18.41,10.457 -40.61,20.203 -66.4,9.16 -24.44,-13.523 -31.45,-39.968 -34.05,-64.289 15.61,-69.304 120.12,-108.687 238.33,-134.882 120.47,-26.09 264.53,-41.278 402.25,-52.313 275.61,-20.84 526.47,-29.121 526.44,-29.883 -0.19,1.504 1004.02,-40.566 1197.77,-99.297 90.38,-17.656 160.37,-35.644 224.4,-58.703 62.29,-24.195 126.43,-49.453 170.83,-113.9256" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path2" d="m 0.4375,470.566 c 78.1406,-28.164 169.4105,-65.019 233.8045,3.575 12.582,17.922 16.805,42.773 7.34,65.129 -9.977,25.496 -42.418,31.265 -64.602,25.418 -27.113,-4.833 -44.64,-33.86 -45.96,-59.317 -4.805,-24.531 2.808,-55.82 20.625,-77.891 30.828,-56.96 147.07,-112.761 289.191,-121.32 142.211,-12.676 309.652,-0.633 468.281,16.203 317.303,36.094 603.553,81.075 603.783,79.395 0.06,-2.481 286.81,46.66 604.58,58.164 157.35,3.203 328.71,-3.621 453.1,-66.699 53.67,-29.16 127.27,-84.649 88.68,-119.407 -16.85,-15.086 -39.05,-8.367 -49.55,6.133 -13.61,13.938 -3.92,23.215 5.24,32.231 35.64,21.172 91.72,-7.649 129.89,-17.153 41.36,-14.351 78.54,-30.523 113.88,-47.839 69.98,-35.215 135.9,-73.567 195.44,-140.5 -54.77,71.066 -119.42,114.667 -188.87,153.207 -35.15,19.058 -72.41,36.668 -114.35,52.156 -21.07,7.48 -43.03,15.066 -67.05,20.808 -20.79,3.723 -55.27,16.977 -81.07,-5.418 -13.12,-5.722 -30.27,-40.128 -8.31,-59.796 13,-20.34 52.39,-32.696 77.76,-8.473 30.51,21.598 16.05,72.449 -9.36,90.105 -22.53,24.004 -51.13,44.786 -83.3,61.375 -131,66.02 -303.94,71.868 -462.63,68.891 -319.99,-11.66 -606.52,-60.949 -606.7,-58.457 -0.19,1.68 -286.93,-43.273 -603.237,-79.211 -158.074,-16.785 -324.738,-28.633 -464.41,-16.152 -140.422,8.679 -248.453,62.59 -274.93,112.824 -31.312,34.226 -21.805,101.98 13.485,108.562 44.828,15.496 62.027,-34.863 41.125,-65.066 C 173.672,422.148 80.2578,446.063 0.4375,470.566" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path3" d="M 645.328,850 H 2895.33 l 180,-850 -2550.002,20 120,830" style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path4" d="m 585.391,281.371 h 48.339 c 28.887,0 42.618,-17.644 43.766,-40.031 1.57,-31.61 -20.312,-47.805 -46.91,-47.805 h -45.195 z m 20.453,-73.875 h 17.879 c 23.738,0 34.175,14.356 33.32,34.106 -0.574,13.961 -9.582,25.808 -27.031,25.808 h -24.168 v -59.914" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path5" d="m 899.172,267.41 h -48.059 v -22.906 h 41.907 v -12.91 h -41.907 v -24.098 h 48.059 V 193.535 H 829.52 v 87.836 h 69.652 V 267.41" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path6" d="m 1054.2,281.371 h 26.31 l 46.77,-66.105 h 0.28 v 66.105 h 19.03 v -87.836 h -25.89 l -47.19,65.055 h -0.29 v -65.055 h -19.02 v 87.836" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path7" d="m 1292.89,281.371 h 80.81 V 267.41 h -29.61 v -73.875 h -21.59 v 73.875 h -29.61 v 13.961" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path8" d="m 1544.06,281.371 h 25.45 l 39.19,-87.836 h -22.88 l -12.73,30.684 h -36.9 l -14.3,-30.684 h -23.46 z m 24.31,-43.191 -12.3,29.363 -14.16,-29.363 h 26.46" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path9" d="m 1750.28,281.371 h 21.6 v -73.875 h 44.91 v -13.961 h -66.51 v 87.836" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path10" d="m 2048.75,242.789 v -46.488 c -11.86,-2.238 -23.87,-4.215 -39.04,-4.215 -28.74,0 -51.19,14.223 -51.19,45.301 0,23.574 18.15,45.433 53.06,45.433 12.16,0 22.3,-1.316 32.03,-3.422 l 1.29,-10.406 c -9.87,2.899 -20.02,5.008 -30.32,5.008 -33.04,0 -42.91,-21.73 -42.91,-36.613 0,-18.699 10.16,-36.481 38.04,-36.481 10.59,-0.129 18.74,1.188 26.47,3.297 v 30.422 h -21.46 v 8.164 h 34.03" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path11" d="m 2206.22,281.371 h 36.61 c 15.73,0 27.89,-5.922 27.89,-22.254 0,-20.804 -21.89,-23.965 -29.04,-23.965 l 30.76,-41.617 h -15.45 l -31.75,48.199 c 2.86,-0.66 6.01,-1.054 9.15,-1.054 12.44,0 23.17,5.531 23.17,16.593 0,13.825 -10.15,15.278 -16.16,15.278 h -22.02 v -79.016 h -13.16 v 87.836" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path12" d="m 2520.28,237.387 c 0,-31.078 -22.45,-45.301 -51.19,-45.301 -28.75,0 -51.2,14.223 -51.2,45.301 0,27.261 19.59,45.433 51.2,45.433 31.6,0 51.19,-18.172 51.19,-45.433 z m -89.24,0 c 0,-18.699 10.16,-36.481 38.05,-36.481 27.88,0 38.03,17.782 38.03,36.481 0,22.519 -14.44,36.613 -38.03,36.613 -23.61,0 -38.05,-14.094 -38.05,-36.613" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path13" d="M 2755.4,281.371 V 224.48 c 0,-16.195 -7.29,-32.394 -41.19,-32.394 -34.04,0 -41.33,16.199 -41.33,32.394 v 56.891 h 13.16 v -54.91 c 0,-14.488 5.58,-25.555 28.03,-25.422 l 0.14,-0.133 c 22.46,0 28.03,11.067 28.03,25.555 v 54.91 h 13.16" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path14" d="m 2913,281.371 h 39.62 c 14.02,0 23.31,-9.086 23.31,-22.254 0,-16.855 -14.59,-26.207 -32.75,-26.207 -3.72,0 -7.43,0.66 -11.15,0.922 l -2.72,8.164 c 3.58,-0.262 7,-0.922 10.58,-0.922 12.73,0 22.88,5.531 22.88,17.25 0,9.746 -5.58,14.227 -15.01,14.227 h -22.17 V 193.535 H 2913 v 87.836" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path15" d="m 584.336,577.883 h 52.555 v -92.047 h 116.238 v 92.047 h 52.555 V 345.32 H 753.129 V 448.879 H 636.891 V 345.32 h -52.555 v 232.563" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path16" d="m 914.273,577.883 h 61.95 L 1071.58,345.32 h -55.68 l -30.978,81.243 H 895.133 L 860.328,345.32 h -57.082 z m 59.165,-114.363 -29.93,77.75 -34.453,-77.75 h 64.383" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path17" d="m 1069.84,577.883 h 64.04 l 113.81,-175.031 h 0.69 v 175.031 h 46.29 V 345.32 h -62.99 l -114.85,172.243 h -0.7 V 345.32 h -46.29 v 232.563" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path18" d="m 1331.56,577.883 h 64.04 l 113.81,-175.031 h 0.69 v 175.031 h 46.29 V 345.32 h -62.99 l -114.85,172.243 h -0.7 V 345.32 h -46.29 v 232.563" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path19" d="m 1665.67,577.883 h 61.96 l 95.36,-232.563 h -55.69 l -30.97,81.243 h -89.8 l -34.8,-81.243 h -57.08 z m 59.17,-114.363 -29.93,77.75 -34.46,-77.75 h 64.39" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path20" d="m 1964.67,369.727 c -17.75,-20.571 -45.93,-28.239 -72.73,-28.239 -62.31,0 -82.84,36.61 -82.84,60.321 0,39.046 27.15,54.043 55.34,71.472 -12.88,16.039 -25.75,34.168 -25.75,54.742 0,34.868 30.62,53.692 61.6,53.692 12.87,0 26.1,-3.488 38.28,-7.32 l 3.13,-18.129 c -12.88,5.226 -27.5,10.113 -40.37,10.113 -22.27,0 -41.76,-13.254 -41.76,-39.055 0,-31.379 36.2,-66.941 104.06,-131.797 6.96,17.086 9.05,22.664 9.05,48.813 h 18.1 v -8.715 c 0,-17.781 -3.83,-36.262 -13.93,-53.691 l 42.81,-36.614 h -26.79 z m -90.49,91 c -22.62,-14.641 -44.19,-26.844 -44.19,-59.274 0,-12.199 12.87,-44.629 61.95,-44.629 23.66,0 45.94,6.281 60.9,24.758 l -78.66,79.145" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path21" d="m 2230.22,577.883 h 33.41 V 345.32 h -20.88 v 210.946 h -0.69 L 2156.78,345.32 h -24.35 l -85.28,210.946 h -0.69 V 345.32 h -20.88 v 232.563 h 33.41 l 85.61,-208.504 85.62,208.504" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path22" d="m 2364.57,577.883 h 29.58 l 91.88,-232.563 h -24.36 l -40.38,104.95 h -93.62 l -46.64,-104.95 h -25.06 z m 51.15,-110.875 -37.58,94.137 h -0.7 l -43.16,-94.137 h 81.44" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path23" d="m 2492.63,362.063 h 138.18 V 345.32 h -162.19 v 20.575 l 139.91,195.25 h -133.99 v 16.738 H 2632.9 V 557.309 L 2492.63,362.063" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path24" d="m 2787.42,472.234 v -16.738 h -108.24 v -93.433 h 118.33 V 345.32 h -140.95 v 232.563 h 140.95 v -16.738 h -118.33 v -88.911 h 108.24" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                        <path id="path25" d="m 2825.7,577.883 h 80.4 c 47.33,0 64.73,-29.289 64.73,-52.649 0,-43.238 -24.01,-66.941 -75.17,-67.992 l 80.05,-111.922 h -28.2 l -84.57,126.219 c 7.66,-1.047 15.67,-2.441 23.67,-2.441 51.51,0 61.6,32.425 61.6,52.652 0,30.676 -24.71,39.395 -45.59,39.395 h -54.29 V 345.32 h -22.63 v 232.563" style="fill:#5988ce;fill-opacity:1;fill-rule:nonzero;stroke:none" transform="matrix(0.13333333,0,0,-0.13333333,0,113.33333)" />
-                    </g>
-                </svg>
-                <div class="company-info">
-                    <div class="company-address">
-                        61 Fourth Street<br>
-                        Stamford, CT 06905<br>
-                        Phone: (203) 348-3756
-                    </div>
-                </div>
-            </div>
-            <h1>⏰ Time Off Requests</h1>
-        </header>
-        
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('request')">📝 New Request</button>
-            <button class="tab" onclick="showTab('list')">📋 My Requests</button>
-            <button class="tab" id="adminTab" onclick="showTab('admin')" style="display: none;">👑 Admin</button>
-            <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
-        </div>
-        
-        <!-- New Request Tab -->
-        <div id="request" class="tab-content active">
-            <form id="requestForm">
-                <div class="form-group">
-                    <label for="employeeName">Full Name *</label>
-                    <input type="text" id="employeeName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="employeeEmail">Email Address *</label>
-                    <input type="email" id="employeeEmail" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="startDate">Start Date *</label>
-                    <input type="date" id="startDate" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="endDate">End Date *</label>
-                    <input type="date" id="endDate" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="ptoHours">PTO Hours Requested *</label>
-                    <div class="hours-selector">
-                        <input type="number" id="ptoHours" class="hours-input" min="0" step="8" value="8" required>
-                        <span>hours</span>
-                    </div>
-                    <div class="hours-buttons">
-                        <button type="button" class="hours-btn" onclick="setPTOHours(8)">8 hrs</button>
-                        <button type="button" class="hours-btn" onclick="setPTOHours(16)">16 hrs</button>
-                        <button type="button" class="hours-btn" onclick="setPTOHours(24)">24 hrs</button>
-                        <button type="button" class="hours-btn" onclick="setPTOHours(32)">32 hrs</button>
-                        <button type="button" class="hours-btn" onclick="setPTOHours(40)">40 hrs</button>
-                    </div>
-                </div>
-                
-                <div class="pto-disclaimer">
-                    <h4>⚠️ PTO Hours Policy</h4>
-                    <p>PTO hours are accrued each pay period. PTO hours cannot exceed the hours that are accruable to you in a given year. If you have the PTO requested, it will be added to your next pay period. If not, it will be unpaid time off.</p>
-                </div>
-                
-                <div class="form-group">
-                    <label>Type of Time Off *</label>
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
-                        <label style="display: flex; align-items: center; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" id="vacation" name="timeOffType" value="Vacation" style="width: auto; margin-right: 10px;">
-                            🏖️ Vacation
-                        </label>
-                        <label style="display: flex; align-items: center; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" id="medical" name="timeOffType" value="Medical Appointment" style="width: auto; margin-right: 10px;">
-                            🏥 Medical Appointment
-                        </label>
-                        <label style="display: flex; align-items: center; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" id="illness" name="timeOffType" value="Illness" style="width: auto; margin-right: 10px;">
-                            🤒 Illness
-                        </label>
-                        <label style="display: flex; align-items: center; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" id="other" name="timeOffType" value="Other" style="width: auto; margin-right: 10px;">
-                            📋 Other
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reason">Additional Details</label>
-                    <textarea id="reason" rows="4" placeholder="Please provide any additional details about your time off request..."></textarea>
-                </div>
-                
-                <button type="submit">Submit Request</button>
-            </form>
-        </div>
-        
-        <!-- My Requests Tab -->
-        <div id="list" class="tab-content">
-            <div id="requestsList"></div>
-        </div>
-        
-        <!-- Admin Tab -->
-        <div id="admin" class="tab-content">
-            <h2 style="margin-bottom: 20px;">Pending Approvals</h2>
-            <div id="pendingRequests"></div>
-        </div>
-        
-        <!-- Settings Tab -->
-        <div id="settings" class="tab-content">
-            <div class="settings-section">
-                <div class="settings-title">Admin Configuration</div>
-                
-                <div class="form-group">
-                    <label for="adminEmail">Admin Email for Notifications</label>
-                    <input type="email" id="adminEmail" placeholder="admin@company.com">
-                </div>
-                
-                <button onclick="saveAdminEmail()" style="margin-bottom: 20px;">Save Admin Email</button>
-                
-                <div id="adminLoginSection">
-                    <div class="form-group">
-                        <label for="adminPassword">Admin Password</label>
-                        <input type="password" id="adminPassword" placeholder="Enter admin password">
-                    </div>
-                    <button onclick="adminLogin()">🔓 Login as Admin</button>
-                </div>
-                
-                <div id="adminLoggedIn" style="display: none;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #d4edda; border-radius: 8px; margin: 10px 0;">
-                        <span style="color: #155724;">✅ Logged in as Admin</span>
-                        <button onclick="adminLogout()" style="width: auto; padding: 8px 16px; background: #dc3545;">Logout</button>
-                    </div>
-                </div>
-                
-                <div id="setupAdminSection" style="display: none;">
-                    <h4 style="color: #856404; margin: 15px 0;">⚠️ First-time Admin Setup</h4>
-                    <div class="form-group">
-                        <label for="newAdminPassword">Create Admin Password</label>
-                        <input type="password" id="newAdminPassword" placeholder="Create a secure password">
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmAdminPassword">Confirm Password</label>
-                        <input type="password" id="confirmAdminPassword" placeholder="Confirm password">
-                    </div>
-                    <button onclick="setupAdmin()">🔒 Set Admin Password</button>
-                </div>
-            </div>
-            
-            <div class="settings-section">
-                <div class="settings-title">Calendar Integration</div>
-                
-                <div class="form-group">
-                    <label>Calendar Service</label>
-                    <select id="calendarService">
-                        <option value="google">Google Calendar</option>
-                        <option value="outlook">Outlook Calendar</option>
-                        <option value="yahoo">Yahoo Calendar</option>
-                        <option value="ics">Download ICS File (iOS/Mac)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="calendarName">Calendar Name (Optional)</label>
-                    <input type="text" id="calendarName" placeholder="Company Time Off Calendar" value="Company Time Off Calendar">
-                </div>
-                
-                <button onclick="saveCalendarSettings()">Save Calendar Settings</button>
-                
-                <div style="margin-top: 15px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 14px;">
-                    <strong>📱 iOS Setup Instructions:</strong><br>
-                    1. When you approve requests, calendar events will open automatically<br>
-                    2. For ICS files: Tap the file → "Add to Calendar" → Choose your calendar<br>
-                    3. Events will appear in your iOS Calendar app
-                </div>
-            </div>
-            
-            <div class="settings-section">
-                <div class="settings-title">App Information</div>
-                <p><strong>Version:</strong> 1.0.0</p>
-                <p><strong>Install:</strong> Add this page to your home screen for the best experience!</p>
-                <button onclick="installPWA()" id="installBtn" style="margin-top: 15px; display: none;">📱 Install App</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Alert Modal -->
-    <div id="alertOverlay" class="alert-overlay hidden"></div>
-    <div id="alertModal" class="alert hidden">
-        <h3 id="alertTitle">Alert</h3>
-        <p id="alertMessage"></p>
-        <button onclick="closeAlert()" style="margin-top: 20px; width: auto; padding: 10px 20px;">OK</button>
-    </div>
+    <div class="container">
+        <header>
+            <div class="header-logo">
+                <div style="height: 60px; width: 120px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #007AFF; font-weight: bold;">
+                    COMPANY LOGO
+                </div>
+                <div class="company-info">
+                    <div class="company-address">
+                        61 Fourth Street<br>
+                        Stamford, CT 06905<br>
+                        Phone: (203) 348-3756
+                    </div>
+                </div>
+            </div>
+            <h1>⏰ Time Off Requests</h1>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('request')">📝 New Request</button>
+            <button class="tab" onclick="showTab('list')">📋 My Requests</button>
+            <button class="tab" id="adminTab" onclick="showTab('admin')" style="display: none;">👑 Admin</button>
+            <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
+        </div>
+        
+        <!-- New Request Tab -->
+        <div id="request" class="tab-content active">
+            <form id="requestForm">
+                <div class="form-group">
+                    <label for="employeeName">Full Name *</label>
+                    <input type="text" id="employeeName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="employeeEmail">Email Address *</label>
+                    <input type="email" id="employeeEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="startDate">Start Date *</label>
+                    <input type="date" id="startDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="endDate">End Date *</label>
+                    <input type="date" id="endDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ptoHours">PTO Hours Requested *</label>
+                    <div class="hours-selector">
+                        <input type="number" id="ptoHours" class="hours-input" min="0" step="8" value="8" required>
+                        <span>hours</span>
+                    </div>
+                    <div class="hours-buttons">
+                        <button type="button" class="hours-btn" onclick="setPTOHours(8)">8 hrs</button>
+                        <button type="button" class="hours-btn" onclick="setPTOHours(16)">16 hrs</button>
+                        <button type="button" class="hours-btn" onclick="setPTOHours(24)">24 hrs</button>
+                        <button type="button" class="hours-btn" onclick="setPTOHours(32)">32 hrs</button>
+                        <button type="button" class="hours-btn" onclick="setPTOHours(40)">40 hrs</button>
+                    </div>
+                </div>
+                
+                <div class="pto-disclaimer">
+                    <h4>⚠️ PTO Hours Policy</h4>
+                    <p>PTO hours are accrued each pay period. PTO hours cannot exceed the hours that are accruable to you in a given year. If you have the PTO requested, it will be added to your next pay period. If not, it will be unpaid time off.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Type of Time Off *</label>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 8px;">
+                        <label style="display: flex; align-items: center; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" id="vacation" name="timeOffType" value="Vacation" style="width: auto; margin-right: 10px;">
+                            🏖️ Vacation
+                        </label>
+                        <label style="display: flex; align-items: center; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" id="medical" name="timeOffType" value="Medical Appointment" style="width: auto; margin-right: 10px;">
+                            🏥 Medical Appointment
+                        </label>
+                        <label style="display: flex; align-items: center; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" id="illness" name="timeOffType" value="Illness" style="width: auto; margin-right: 10px;">
+                            🤒 Illness
+                        </label>
+                        <label style="display: flex; align-items: center; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" id="other" name="timeOffType" value="Other" style="width: auto; margin-right: 10px;">
+                            📋 Other
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reason">Additional Details</label>
+                    <textarea id="reason" rows="4" placeholder="Please provide any additional details about your time off request..."></textarea>
+                </div>
+                
+                <button type="submit">Submit Request</button>
+            </form>
+        </div>
+        
+        <!-- My Requests Tab -->
+        <div id="list" class="tab-content">
+            <div id="requestsList"></div>
+        </div>
+        
+        <!-- Admin Tab -->
+        <div id="admin" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Pending Approvals</h2>
+            <div id="pendingRequests"></div>
+        </div>
+        
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="settings-section">
+                <div class="settings-title">Admin Configuration</div>
+                
+                <div class="form-group">
+                    <label for="adminEmail">Admin Email for Notifications</label>
+                    <input type="email" id="adminEmail" placeholder="admin@company.com">
+                </div>
+                
+                <button onclick="saveAdminEmail()" style="margin-bottom: 20px;">Save Admin Email</button>
+                
+                <div id="adminLoginSection">
+                    <div class="form-group">
+                        <label for="adminPassword">Admin Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter admin password">
+                    </div>
+                    <button onclick="adminLogin()">🔓 Login as Admin</button>
+                </div>
+                
+                <div id="adminLoggedIn" style="display: none;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #d4edda; border-radius: 8px; margin: 10px 0;">
+                        <span style="color: #155724;">✅ Logged in as Admin</span>
+                        <button onclick="adminLogout()" style="width: auto; padding: 8px 16px; background: #dc3545;">Logout</button>
+                    </div>
+                </div>
+                
+                <div id="setupAdminSection" style="display: none;">
+                    <h4 style="color: #856404; margin: 15px 0;">⚠️ First-time Admin Setup</h4>
+                    <div class="form-group">
+                        <label for="newAdminPassword">Create Admin Password</label>
+                        <input type="password" id="newAdminPassword" placeholder="Create a secure password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmAdminPassword">Confirm Password</label>
+                        <input type="password" id="confirmAdminPassword" placeholder="Confirm password">
+                    </div>
+                    <button onclick="setupAdmin()">🔒 Set Admin Password</button>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-title">Calendar Integration</div>
+                
+                <div class="form-group">
+                    <label>Calendar Service</label>
+                    <select id="calendarService">
+                        <option value="google">Google Calendar</option>
+                        <option value="outlook">Outlook Calendar</option>
+                        <option value="yahoo">Yahoo Calendar</option>
+                        <option value="ics">Download ICS File (iOS/Mac)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="calendarName">Calendar Name (Optional)</label>
+                    <input type="text" id="calendarName" placeholder="Company Time Off Calendar" value="Company Time Off Calendar">
+                </div>
+                
+                <button onclick="saveCalendarSettings()">Save Calendar Settings</button>
+                
+                <div style="margin-top: 15px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 14px;">
+                    <strong>📱 iOS Setup Instructions:</strong><br>
+                    1. When you approve requests, calendar events will open automatically<br>
+                    2. For ICS files: Tap the file → "Add to Calendar" → Choose your calendar<br>
+                    3. Events will appear in your iOS Calendar app
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-title">App Information</div>
+                <p><strong>Version:</strong> 1.0.0</p>
+                <p><strong>Install:</strong> Add this page to your home screen for the best experience!</p>
+                <button onclick="installPWA()" id="installBtn" style="margin-top: 15px; display: none;">📱 Install App</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alert Modal -->
+    <div id="alertOverlay" class="alert-overlay hidden"></div>
+    <div id="alertModal" class="alert hidden">
+        <h3 id="alertTitle">Alert</h3>
+        <p id="alertMessage"></p>
+        <button onclick="closeAlert()" style="margin-top: 20px; width: auto; padding: 10px 20px;">OK</button>
+    </div>
 
-    <script>
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:application/javascript;base64,' + btoa(`
-                const CACHE_NAME = 'vacation-app-v1';
-                const urlsToCache = ['/'];
-                
-                self.addEventListener('install', event => {
-                    event.waitUntil(
-                        caches.open(CACHE_NAME)
-                        .then(cache => cache.addAll(urlsToCache))
-                    );
-                });
-                
-                self.addEventListener('fetch', event => {
-                    event.respondWith(
-                        caches.match(event.request)
-                        .then(response => response || fetch(event.request))
-                    );
-                });
-            `));
-        }
+    <script>
+        // App State
+        let requests = JSON.parse(localStorage.getItem('timeOffRequests') || '[]');
+        let adminSettings = JSON.parse(localStorage.getItem('adminSettings') || '{"adminEmail": "", "isAdminMode": false, "adminPasswordHash": "", "calendarService": "google", "calendarName": "Company Time Off Calendar"}');
+        let deferredPrompt;
+        let isAdminLoggedIn = sessionStorage.getItem('adminSession') === 'true';
 
-        // App State
-        let requests = JSON.parse(localStorage.getItem('timeOffRequests') || '[]');
-        let adminSettings = JSON.parse(localStorage.getItem('adminSettings') || '{"adminEmail": "", "isAdminMode": false, "adminPasswordHash": "", "calendarService": "google", "calendarName": "Company Time Off Calendar"}');
-        let deferredPrompt;
-        let isAdminLoggedIn = sessionStorage.getItem('adminSession') === 'true';
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            renderRequests();
+            renderPendingRequests();
+            checkAdminSession();
+            
+            // Set minimum dates to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').min = today;
+            document.getElementById('endDate').min = today;
+            
+            // Add PTO hours validation
+            document.getElementById('ptoHours').addEventListener('input', validatePTOHours);
+        });
 
-        // Initialize App
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSettings();
-            renderRequests();
-            renderPendingRequests();
-            checkAdminSession();
-            
-            // Set minimum dates to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').min = today;
-            document.getElementById('endDate').min = today;
-            
-            // Add PTO hours validation
-            document.getElementById('ptoHours').addEventListener('input', validatePTOHours);
-        });
+        // PWA Install
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'block';
+        });
 
-        // PWA Install
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installBtn').style.display = 'block';
-        });
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    if (result.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
 
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((result) => {
-                    if (result.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                    }
-                    deferredPrompt = null;
-                });
-            }
-        }
+        // PTO Hours Functions
+        function setPTOHours(hours) {
+            document.getElementById('ptoHours').value = hours;
+        }
 
-        // PTO Hours Functions
-        function setPTOHours(hours) {
-            document.getElementById('ptoHours').value = hours;
-        }
+        function validatePTOHours() {
+            const ptoHours = parseInt(document.getElementById('ptoHours').value);
+            if (ptoHours % 8 !== 0) {
+                document.getElementById('ptoHours').value = Math.round(ptoHours / 8) * 8;
+            }
+            if (ptoHours < 0) {
+                document.getElementById('ptoHours').value = 0;
+            }
+        }
 
-        function validatePTOHours() {
-            const ptoHours = parseInt(document.getElementById('ptoHours').value);
-            if (ptoHours % 8 !== 0) {
-                document.getElementById('ptoHours').value = Math.round(ptoHours / 8) * 8;
-            }
-            if (ptoHours < 0) {
-                document.getElementById('ptoHours').value = 0;
-            }
-        }
+        // Tab Navigation
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Find and activate the clicked tab button
+            const clickedTab = Array.from(document.querySelectorAll('.tab')).find(tab => 
+                tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(tabName)
+            );
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
+        }
 
-        // Tab Navigation
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
-            
-            // Find and activate the clicked tab button
-            const clickedTab = Array.from(document.querySelectorAll('.tab')).find(tab => 
-                tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(tabName)
-            );
-            if (clickedTab) {
-                clickedTab.classList.add('active');
-            }
-        }
+        // Form Submission
+        document.getElementById('requestForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get selected time off types
+            const checkboxes = document.querySelectorAll('input[name="timeOffType"]:checked');
+            const timeOffTypes = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (timeOffTypes.length === 0) {
+                showAlert('Error', 'Please select at least one type of time off.');
+                return;
+            }
+            
+            const ptoHours = parseInt(document.getElementById('ptoHours').value);
+            if (!ptoHours || ptoHours <= 0) {
+                showAlert('Error', 'Please enter valid PTO hours (must be greater than 0).');
+                return;
+            }
+            
+            if (ptoHours % 8 !== 0) {
+                showAlert('Error', 'PTO hours must be in increments of 8 hours.');
+                return;
+            }
+            
+            const formData = {
+                id: Date.now().toString(),
+                employeeName: document.getElementById('employeeName').value,
+                employeeEmail: document.getElementById('employeeEmail').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                ptoHours: ptoHours,
+                timeOffTypes: timeOffTypes,
+                reason: document.getElementById('reason').value || '',
+                dateSubmitted: new Date().toISOString().split('T')[0],
+                status: 'pending'
+            };
+            
+            // Validate dates
+            if (new Date(formData.startDate) > new Date(formData.endDate)) {
+                showAlert('Error', 'End date must be after start date');
+                return;
+            }
+            
+            // Add request
+            requests.push(formData);
+            saveData();
+            
+            // Send email notification
+            sendAdminNotification(formData);
+            
+            // Clear form
+            document.getElementById('requestForm').reset();
+            document.querySelectorAll('input[name="timeOffType"]').forEach(cb => cb.checked = false);
+            document.getElementById('ptoHours').value = 8;
+            
+            // Show success message
+            showAlert('Success', 'Your time off request has been submitted and the admin has been notified.');
+            
+            // Refresh displays
+            renderRequests();
+            renderPendingRequests();
+        });
 
-        // Form Submission
-        document.getElementById('requestForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get selected time off types
-            const checkboxes = document.querySelectorAll('input[name="timeOffType"]:checked');
-            const timeOffTypes = Array.from(checkboxes).map(cb => cb.value);
-            
-            if (timeOffTypes.length === 0) {
-                showAlert('Error', 'Please select at least one type of time off.');
-                return;
-            }
-            
-            const ptoHours = parseInt(document.getElementById('ptoHours').value);
-            if (!ptoHours || ptoHours <= 0) {
-                showAlert('Error', 'Please enter valid PTO hours (must be greater than 0).');
-                return;
-            }
-            
-            if (ptoHours % 8 !== 0) {
-                showAlert('Error', 'PTO hours must be in increments of 8 hours.');
-                return;
-            }
-            
-            const formData = {
-                id: Date.now().toString(),
-                employeeName: document.getElementById('employeeName').value,
-                employeeEmail: document.getElementById('employeeEmail').value,
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-                ptoHours: ptoHours,
-                timeOffTypes: timeOffTypes,
-                reason: document.getElementById('reason').value || '',
-                dateSubmitted: new Date().toISOString().split('T')[0],
-                status: 'pending'
-            };
-            
-            // Validate dates
-            if (new Date(formData.startDate) > new Date(formData.endDate)) {
-                showAlert('Error', 'End date must be after start date');
-                return;
-            }
-            
-            // Add request
-            requests.push(formData);
-            saveData();
-            
-            // Send email notification
-            sendAdminNotification(formData);
-            
-            // Clear form
-            document.getElementById('requestForm').reset();
-            document.querySelectorAll('input[name="timeOffType"]').forEach(cb => cb.checked = false);
-            document.getElementById('ptoHours').value = 8;
-            
-            // Show success message
-            showAlert('Success', 'Your time off request has been submitted and the admin has been notified.');
-            
-            // Refresh displays
-            renderRequests();
-            renderPendingRequests();
-        });
-
-        // Email Notification
-        function sendAdminNotification(request) {
-            if (!adminSettings.adminEmail) {
-                console.log('No admin email configured');
-                return;
-            }
-            
-            const subject = `New Time Off Request - ${request.employeeName}`;
-            const body = `A new time off request has been submitted:
+        // Email Notification
+        function sendAdminNotification(request) {
+            if (!adminSettings.adminEmail) {
+                console.log('No admin email configured');
+                return;
+            }
+            
+            const subject = `New Time Off Request - ${request.employeeName}`;
+            const body = `A new time off request has been submitted:
 
 Employee: ${request.employeeName}
 Email: ${request.employeeEmail}
@@ -786,172 +738,172 @@ Type of Time Off: ${request.timeOffTypes.join(', ')}
 Additional Details: ${request.reason || 'None provided'}
 
 Please review and approve/deny this request in the time off app.`;
-            
-            // Create mailto link
-            const mailtoLink = `mailto:${adminSettings.adminEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            
-            // Open email client
-            window.location.href = mailtoLink;
-        }
+            
+            // Create mailto link
+            const mailtoLink = `mailto:${adminSettings.adminEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Open email client
+            window.location.href = mailtoLink;
+        }
 
-        // Render Functions
-        function renderRequests() {
-            const container = document.getElementById('requestsList');
-            
-            if (requests.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📋</div>
-                        <h3>No requests yet</h3>
-                        <p>Submit your first vacation request to get started!</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = requests.map(request => `
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="employee-name">${request.employeeName}</div>
-                        <div class="status-badge status-${request.status}">${request.status}</div>
-                    </div>
-                    <div class="request-details">📅 ${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}</div>
-                    <div class="request-details">📧 ${request.employeeEmail}</div>
-                    <div class="request-details">⏰ ${request.ptoHours || 0} PTO hours</div>
-                    <div class="request-details">🏷️ ${request.timeOffTypes ? request.timeOffTypes.join(', ') : request.reason}</div>
-                    ${request.reason ? `<div class="request-details">📝 ${request.reason}</div>` : ''}
-                    <div class="request-details">📤 Submitted: ${new Date(request.dateSubmitted).toLocaleDateString()}</div>
-                </div>
-            `).join('');
-        }
+        // Render Functions
+        function renderRequests() {
+            const container = document.getElementById('requestsList');
+            
+            if (requests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>No requests yet</h3>
+                        <p>Submit your first vacation request to get started!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = requests.map(request => `
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="employee-name">${request.employeeName}</div>
+                        <div class="status-badge status-${request.status}">${request.status}</div>
+                    </div>
+                    <div class="request-details">📅 ${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}</div>
+                    <div class="request-details">📧 ${request.employeeEmail}</div>
+                    <div class="request-details">⏰ ${request.ptoHours || 0} PTO hours</div>
+                    <div class="request-details">🏷️ ${request.timeOffTypes ? request.timeOffTypes.join(', ') : request.reason}</div>
+                    ${request.reason ? `<div class="request-details">📝 ${request.reason}</div>` : ''}
+                    <div class="request-details">📤 Submitted: ${new Date(request.dateSubmitted).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
 
-        function renderPendingRequests() {
-            const container = document.getElementById('pendingRequests');
-            const pendingRequests = requests.filter(r => r.status === 'pending');
-            
-            if (!isAdminLoggedIn) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🔒</div>
-                        <h3>Admin Login Required</h3>
-                        <p>Please login as admin in Settings to view and approve requests.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            if (pendingRequests.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">✅</div>
-                        <h3>No pending requests</h3>
-                        <p>All requests have been processed!</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = pendingRequests.map(request => `
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="employee-name">${request.employeeName}</div>
-                        <div class="status-badge status-${request.status}">${request.status}</div>
-                    </div>
-                    <div class="request-details">📧 ${request.employeeEmail}</div>
-                    <div class="request-details">📅 ${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}</div>
-                    <div class="request-details">⏰ ${request.ptoHours || 0} PTO hours</div>
-                    <div class="request-details">🏷️ ${request.timeOffTypes ? request.timeOffTypes.join(', ') : 'Legacy request'}</div>
-                    ${request.reason ? `<div class="request-details">📝 ${request.reason}</div>` : ''}
-                    <div class="request-details">📤 Submitted: ${new Date(request.dateSubmitted).toLocaleDateString()}</div>
-                    
-                    <div class="admin-actions">
-                        <button class="btn-approve" onclick="updateRequestStatus('${request.id}', 'approved')">
-                            ✅ Approve
-                        </button>
-                        <button class="btn-deny" onclick="updateRequestStatus('${request.id}', 'denied')">
-                            ❌ Deny
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
+        function renderPendingRequests() {
+            const container = document.getElementById('pendingRequests');
+            const pendingRequests = requests.filter(r => r.status === 'pending');
+            
+            if (!isAdminLoggedIn) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔒</div>
+                        <h3>Admin Login Required</h3>
+                        <p>Please login as admin in Settings to view and approve requests.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (pendingRequests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <h3>No pending requests</h3>
+                        <p>All requests have been processed!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = pendingRequests.map(request => `
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="employee-name">${request.employeeName}</div>
+                        <div class="status-badge status-${request.status}">${request.status}</div>
+                    </div>
+                    <div class="request-details">📧 ${request.employeeEmail}</div>
+                    <div class="request-details">📅 ${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}</div>
+                    <div class="request-details">⏰ ${request.ptoHours || 0} PTO hours</div>
+                    <div class="request-details">🏷️ ${request.timeOffTypes ? request.timeOffTypes.join(', ') : 'Legacy request'}</div>
+                    ${request.reason ? `<div class="request-details">📝 ${request.reason}</div>` : ''}
+                    <div class="request-details">📤 Submitted: ${new Date(request.dateSubmitted).toLocaleDateString()}</div>
+                    
+                    <div class="admin-actions">
+                        <button class="btn-approve" onclick="updateRequestStatus('${request.id}', 'approved')">
+                            ✅ Approve
+                        </button>
+                        <button class="btn-deny" onclick="updateRequestStatus('${request.id}', 'denied')">
+                            ❌ Deny
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-        // Admin Functions
-        function updateRequestStatus(requestId, status) {
-            // Check if user is logged in as admin
-            if (!isAdminLoggedIn) {
-                showAlert('Access Denied', 'You must be logged in as admin to approve/deny requests.');
-                return;
-            }
-            
-            const requestIndex = requests.findIndex(r => r.id === requestId);
-            if (requestIndex !== -1) {
-                requests[requestIndex].status = status;
-                saveData();
-                
-                if (status === 'approved') {
-                    addToCalendar(requests[requestIndex]);
-                }
-                
-                renderRequests();
-                renderPendingRequests();
-                
-                showAlert('Success', `Request has been ${status}.`);
-            }
-        }
+        // Admin Functions
+        function updateRequestStatus(requestId, status) {
+            // Check if user is logged in as admin
+            if (!isAdminLoggedIn) {
+                showAlert('Access Denied', 'You must be logged in as admin to approve/deny requests.');
+                return;
+            }
+            
+            const requestIndex = requests.findIndex(r => r.id === requestId);
+            if (requestIndex !== -1) {
+                requests[requestIndex].status = status;
+                saveData();
+                
+                if (status === 'approved') {
+                    addToCalendar(requests[requestIndex]);
+                }
+                
+                renderRequests();
+                renderPendingRequests();
+                
+                showAlert('Success', `Request has been ${status}.`);
+            }
+        }
 
-        function addToCalendar(request) {
-            const startDate = new Date(request.startDate);
-            const endDate = new Date(request.endDate);
-            endDate.setDate(endDate.getDate() + 1); // Add one day for all-day event
-            
-            const timeOffType = request.timeOffTypes ? request.timeOffTypes.join(', ') : 'Time Off';
-            const eventTitle = `${request.employeeName} - ${timeOffType}`;
-            const eventDetails = `Type: ${timeOffType}\nPTO Hours: ${request.ptoHours || 0} hours\nEmployee Email: ${request.employeeEmail}\nAdditional Details: ${request.reason || 'None provided'}\nApproved on: ${new Date().toLocaleDateString()}`;
-            
-            // Format dates for calendar URL (YYYYMMDD format)
-            const formatDate = (date) => {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}${month}${day}`;
-            };
-            
-            const startDateFormatted = formatDate(startDate);
-            const endDateFormatted = formatDate(endDate);
-            
-            const calendarService = adminSettings.calendarService || 'google';
-            
-            let calendarUrl;
-            
-            switch (calendarService) {
-                case 'google':
-                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(eventDetails)}&location=${encodeURIComponent('Company')}`;
-                    break;
-                    
-                case 'outlook':
-                    calendarUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&body=${encodeURIComponent(eventDetails)}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&allday=true`;
-                    break;
-                    
-                case 'yahoo':
-                    calendarUrl = `https://calendar.yahoo.com/?v=60&view=d&type=20&title=${encodeURIComponent(eventTitle)}&st=${startDateFormatted}&dur=allday&desc=${encodeURIComponent(eventDetails)}`;
-                    break;
-                    
-                case 'ics':
-                    downloadICSFile(request, eventTitle, eventDetails, startDate, endDate);
-                    return;
-                    
-                default:
-                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(eventDetails)}`;
-            }
-            
-            // Open calendar in new tab/window
-            window.open(calendarUrl, '_blank');
-        }
-        
-        function downloadICSFile(request, title, details, startDate, endDate) {
-            // Create ICS file content
-            const icsContent = `BEGIN:VCALENDAR
+        function addToCalendar(request) {
+            const startDate = new Date(request.startDate);
+            const endDate = new Date(request.endDate);
+            endDate.setDate(endDate.getDate() + 1); // Add one day for all-day event
+            
+            const timeOffType = request.timeOffTypes ? request.timeOffTypes.join(', ') : 'Time Off';
+            const eventTitle = `${request.employeeName} - ${timeOffType}`;
+            const eventDetails = `Type: ${timeOffType}\nPTO Hours: ${request.ptoHours || 0} hours\nEmployee Email: ${request.employeeEmail}\nAdditional Details: ${request.reason || 'None provided'}\nApproved on: ${new Date().toLocaleDateString()}`;
+            
+            // Format dates for calendar URL (YYYYMMDD format)
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}${month}${day}`;
+            };
+            
+            const startDateFormatted = formatDate(startDate);
+            const endDateFormatted = formatDate(endDate);
+            
+            const calendarService = adminSettings.calendarService || 'google';
+            
+            let calendarUrl;
+            
+            switch (calendarService) {
+                case 'google':
+                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(eventDetails)}&location=${encodeURIComponent('Company')}`;
+                    break;
+                    
+                case 'outlook':
+                    calendarUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&body=${encodeURIComponent(eventDetails)}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&allday=true`;
+                    break;
+                    
+                case 'yahoo':
+                    calendarUrl = `https://calendar.yahoo.com/?v=60&view=d&type=20&title=${encodeURIComponent(eventTitle)}&st=${startDateFormatted}&dur=allday&desc=${encodeURIComponent(eventDetails)}`;
+                    break;
+                    
+                case 'ics':
+                    downloadICSFile(request, eventTitle, eventDetails, startDate, endDate);
+                    return;
+                    
+                default:
+                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(eventDetails)}`;
+            }
+            
+            // Open calendar in new tab/window
+            window.open(calendarUrl, '_blank');
+        }
+        
+        function downloadICSFile(request, title, details, startDate, endDate) {
+            // Create ICS file content
+            const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Vacation App//EN
 CALSCALE:GREGORIAN
@@ -971,197 +923,164 @@ ACTION:DISPLAY
 END:VALARM
 END:VEVENT
 END:VCALENDAR`;
-            
-            // Create and download the file
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = `${request.employeeName}-vacation-${request.startDate}.ics`;
-            
-            // Trigger download
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Show instructions for iOS
-            showAlert('Calendar File Downloaded', 'The calendar file has been downloaded. On iOS: Open the file, then tap "Add to Calendar" to import it into your iOS Calendar app.');
-        }
+            
+            // Create and download the file
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `${request.employeeName}-vacation-${request.startDate}.ics`;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show instructions for iOS
+            showAlert('Calendar File Downloaded', 'The calendar file has been downloaded. On iOS: Open the file, then tap "Add to Calendar" to import it into your iOS Calendar app.');
+        }
 
-        // Settings Functions
-        function loadSettings() {
-            document.getElementById('adminEmail').value = adminSettings.adminEmail || '';
-            document.getElementById('calendarService').value = adminSettings.calendarService || 'google';
-            document.getElementById('calendarName').value = adminSettings.calendarName || 'Company Time Off Calendar';
-            checkAdminSetup();
-        }
+        // Settings Functions
+        function loadSettings() {
+            document.getElementById('adminEmail').value = adminSettings.adminEmail || '';
+            document.getElementById('calendarService').value = adminSettings.calendarService || 'google';
+            document.getElementById('calendarName').value = adminSettings.calendarName || 'Company Time Off Calendar';
+            checkAdminSetup();
+        }
 
-        function checkAdminSetup() {
-            const setupSection = document.getElementById('setupAdminSection');
-            const loginSection = document.getElementById('adminLoginSection');
-            const loggedInSection = document.getElementById('adminLoggedIn');
-            
-            if (!adminSettings.adminPasswordHash) {
-                // No admin password set - show setup
-                setupSection.style.display = 'block';
-                loginSection.style.display = 'none';
-                loggedInSection.style.display = 'none';
-            } else if (isAdminLoggedIn) {
-                // Admin logged in
-                setupSection.style.display = 'none';
-                loginSection.style.display = 'none';
-                loggedInSection.style.display = 'block';
-                document.getElementById('adminTab').style.display = 'block';
-            } else {
-                // Admin password exists but not logged in
-                setupSection.style.display = 'none';
-                loginSection.style.display = 'block';
-                loggedInSection.style.display = 'none';
-                document.getElementById('adminTab').style.display = 'none';
-            }
-        }
+        function checkAdminSetup() {
+            const setupSection = document.getElementById('setupAdminSection');
+            const loginSection = document.getElementById('adminLoginSection');
+            const loggedInSection = document.getElementById('adminLoggedIn');
+            
+            if (!adminSettings.adminPasswordHash) {
+                // No admin password set - show setup
+                setupSection.style.display = 'block';
+                loginSection.style.display = 'none';
+                loggedInSection.style.display = 'none';
+            } else if (isAdminLoggedIn) {
+                // Admin logged in
+                setupSection.style.display = 'none';
+                loginSection.style.display = 'none';
+                loggedInSection.style.display = 'block';
+                document.getElementById('adminTab').style.display = 'block';
+            } else {
+                // Admin password exists but not logged in
+                setupSection.style.display = 'none';
+                loginSection.style.display = 'block';
+                loggedInSection.style.display = 'none';
+                document.getElementById('adminTab').style.display = 'none';
+            }
+        }
 
-        function checkAdminSession() {
-            isAdminLoggedIn = sessionStorage.getItem('adminSession') === 'true';
-            checkAdminSetup();
-        }
+        function checkAdminSession() {
+            isAdminLoggedIn = sessionStorage.getItem('adminSession') === 'true';
+            checkAdminSetup();
+        }
 
-        async function hashPassword(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hash))
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('');
-        }
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
 
-        async function setupAdmin() {
-            const password = document.getElementById('newAdminPassword').value;
-            const confirmPassword = document.getElementById('confirmAdminPassword').value;
-            
-            if (password !== confirmPassword) {
-                showAlert('Error', 'Passwords do not match.');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showAlert('Error', 'Password must be at least 6 characters long.');
-                return;
-            }
-            
-            adminSettings.adminPasswordHash = await hashPassword(password);
-            saveData();
-            
-            // Clear password fields
-            document.getElementById('newAdminPassword').value = '';
-            document.getElementById('confirmAdminPassword').value = '';
-            
-            showAlert('Success', 'Admin password has been set successfully. You can now login as admin.');
-            checkAdminSetup();
-        }
+        async function setupAdmin() {
+            const password = document.getElementById('newAdminPassword').value;
+            const confirmPassword = document.getElementById('confirmAdminPassword').value;
+            
+            if (password !== confirmPassword) {
+                showAlert('Error', 'Passwords do not match.');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAlert('Error', 'Password must be at least 6 characters long.');
+                return;
+            }
+            
+            adminSettings.adminPasswordHash = await hashPassword(password);
+            saveData();
+            
+            // Clear password fields
+            document.getElementById('newAdminPassword').value = '';
+            document.getElementById('confirmAdminPassword').value = '';
+            
+            showAlert('Success', 'Admin password has been set successfully. You can now login as admin.');
+            checkAdminSetup();
+        }
 
-        async function adminLogin() {
-            const password = document.getElementById('adminPassword').value;
-            
-            if (!password) {
-                showAlert('Error', 'Please enter the admin password.');
-                return;
-            }
-            
-            const passwordHash = await hashPassword(password);
-            
-            if (passwordHash === adminSettings.adminPasswordHash) {
-                isAdminLoggedIn = true;
-                sessionStorage.setItem('adminSession', 'true');
-                document.getElementById('adminPassword').value = '';
-                checkAdminSetup();
-                renderPendingRequests(); // Refresh admin view
-                showAlert('Success', 'Successfully logged in as admin.');
-            } else {
-                showAlert('Error', 'Incorrect admin password.');
-            }
-        }
+        async function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (!password) {
+                showAlert('Error', 'Please enter the admin password.');
+                return;
+            }
+            
+            const passwordHash = await hashPassword(password);
+            
+            if (passwordHash === adminSettings.adminPasswordHash) {
+                isAdminLoggedIn = true;
+                sessionStorage.setItem('adminSession', 'true');
+                document.getElementById('adminPassword').value = '';
+                checkAdminSetup();
+                renderPendingRequests(); // Refresh admin view
+                showAlert('Success', 'Successfully logged in as admin.');
+            } else {
+                showAlert('Error', 'Incorrect admin password.');
+            }
+        }
 
-        function adminLogout() {
-            isAdminLoggedIn = false;
-            sessionStorage.removeItem('adminSession');
-            checkAdminSetup();
-            
-            // If currently on admin tab, switch to list tab
-            if (document.getElementById('admin').classList.contains('active')) {
-                showTab('list');
-                document.querySelector('[onclick="showTab(\'list\')"]').classList.add('active');
-            }
-            
-            showAlert('Success', 'Successfully logged out.');
-        }
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            sessionStorage.removeItem('adminSession');
+            checkAdminSetup();
+            
+            // If currently on admin tab, switch to list tab
+            if (document.getElementById('admin').classList.contains('active')) {
+                showTab('list');
+                document.querySelector('[onclick="showTab(\'list\')"]').classList.add('active');
+            }
+            
+            showAlert('Success', 'Successfully logged out.');
+        }
 
-        function saveAdminEmail() {
-            const email = document.getElementById('adminEmail').value;
-            adminSettings.adminEmail = email;
-            saveData();
-            showAlert('Success', 'Admin email has been saved successfully.');
-        }
+        function saveAdminEmail() {
+            const email = document.getElementById('adminEmail').value;
+            adminSettings.adminEmail = email;
+            saveData();
+            showAlert('Success', 'Admin email has been saved successfully.');
+        }
 
-        function saveCalendarSettings() {
-            adminSettings.calendarService = document.getElementById('calendarService').value;
-            adminSettings.calendarName = document.getElementById('calendarName').value;
-            saveData();
-            showAlert('Success', 'Calendar settings have been saved successfully.');
-        }
+        function saveCalendarSettings() {
+            adminSettings.calendarService = document.getElementById('calendarService').value;
+            adminSettings.calendarName = document.getElementById('calendarName').value;
+            saveData();
+            showAlert('Success', 'Calendar settings have been saved successfully.');
+        }
 
-        // Utility Functions
-        function saveData() {
-            localStorage.setItem('timeOffRequests', JSON.stringify(requests));
-            localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
-        }
+        // Utility Functions
+        function saveData() {
+            localStorage.setItem('timeOffRequests', JSON.stringify(requests));
+            localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
+        }
 
-        function showAlert(title, message) {
-            document.getElementById('alertTitle').textContent = title;
-            document.getElementById('alertMessage').textContent = message;
-            document.getElementById('alertOverlay').classList.remove('hidden');
-            document.getElementById('alertModal').classList.remove('hidden');
-        }
+        function showAlert(title, message) {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('alertOverlay').classList.remove('hidden');
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
 
-        function closeAlert() {
-            document.getElementById('alertOverlay').classList.add('hidden');
-            document.getElementById('alertModal').classList.add('hidden');
-        }
+        function closeAlert() {
+            document.getElementById('alertOverlay').classList.add('hidden');
+            document.getElementById('alertModal').classList.add('hidden');
+        }
 
-        // Close alert when clicking overlay
-        document.getElementById('alertOverlay').addEventListener('click', closeAlert);
-    </script>
-
-<script>
-function showTab(tabId) {
-  // Hide all tab contents
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  // Remove active class from all tab buttons
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  // Show the selected tab content
-  const activeTabContent = document.getElementById(tabId);
-  if (activeTabContent) {
-    activeTabContent.classList.add('active');
-  }
-  // Highlight the clicked tab button
-  const activeTabButton = Array.from(document.querySelectorAll('.tab')).find(btn => btn.getAttribute('onclick') === `showTab('${tabId}')`);
-  if (activeTabButton) {
-    activeTabButton.classList.add('active');
-  }
-  // If settings tab, load settings
-  if (tabId === 'settings' && typeof loadSettings === 'function') {
-    loadSettings();
-  }
-}
-
-// Optionally, set default active tab on page load
-document.addEventListener('DOMContentLoaded', function() {
-  // Activate first tab or default
-  const defaultTab = document.querySelector('.tab');
-  if (defaultTab) {
-    defaultTab.click();
-  }
-});
-</script>
-
+        // Close alert when clicking overlay
+        document.getElementById('alertOverlay').addEventListener('click', closeAlert);
+    </script>
 </body>
 </html>
