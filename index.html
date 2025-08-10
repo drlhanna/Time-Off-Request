@@ -1130,5 +1130,38 @@ END:VCALENDAR`;
         // Close alert when clicking overlay
         document.getElementById('alertOverlay').addEventListener('click', closeAlert);
     </script>
+
+<script>
+function showTab(tabId) {
+  // Hide all tab contents
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  // Remove active class from all tab buttons
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  // Show the selected tab content
+  const activeTabContent = document.getElementById(tabId);
+  if (activeTabContent) {
+    activeTabContent.classList.add('active');
+  }
+  // Highlight the clicked tab button
+  const activeTabButton = Array.from(document.querySelectorAll('.tab')).find(btn => btn.getAttribute('onclick') === `showTab('${tabId}')`);
+  if (activeTabButton) {
+    activeTabButton.classList.add('active');
+  }
+  // If settings tab, load settings
+  if (tabId === 'settings' && typeof loadSettings === 'function') {
+    loadSettings();
+  }
+}
+
+// Optionally, set default active tab on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Activate first tab or default
+  const defaultTab = document.querySelector('.tab');
+  if (defaultTab) {
+    defaultTab.click();
+  }
+});
+</script>
+
 </body>
 </html>
