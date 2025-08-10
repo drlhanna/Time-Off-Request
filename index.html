@@ -342,6 +342,16 @@
             transform: none;
             box-shadow: none;
         }
+
+        .access-denied {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
         
         @media (max-width: 600px) {
             .admin-actions {
@@ -429,7 +439,7 @@
             <button class="tab active" onclick="showTab('request')">📝 New Request</button>
             <button class="tab" onclick="showTab('list')">📋 My Requests</button>
             <button class="tab" id="adminTab" onclick="showTab('admin')" style="display: none;">👑 Admin</button>
-            <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
+            <button class="tab" id="settingsTab" onclick="showTab('settings')">⚙️ Settings</button>
         </div>
         
         <!-- New Request Tab -->
@@ -520,79 +530,7 @@
         
         <!-- Settings Tab -->
         <div id="settings" class="tab-content">
-            <div class="settings-section">
-                <div class="settings-title">Admin Configuration</div>
-                
-                <div class="form-group">
-                    <label for="adminEmail">Admin Email for Notifications</label>
-                    <input type="email" id="adminEmail" placeholder="admin@company.com">
-                </div>
-                
-                <button onclick="saveAdminEmail()" style="margin-bottom: 20px;">Save Admin Email</button>
-                
-                <div id="adminLoginSection">
-                    <div class="form-group">
-                        <label for="adminPassword">Admin Password</label>
-                        <input type="password" id="adminPassword" placeholder="Enter admin password">
-                    </div>
-                    <button onclick="adminLogin()">🔓 Login as Admin</button>
-                </div>
-                
-                <div id="adminLoggedIn" style="display: none;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #d4edda; border-radius: 8px; margin: 10px 0;">
-                        <span style="color: #155724;">✅ Logged in as Admin</span>
-                        <button onclick="adminLogout()" style="width: auto; padding: 8px 16px; background: #dc3545;">Logout</button>
-                    </div>
-                </div>
-                
-                <div id="setupAdminSection" style="display: none;">
-                    <h4 style="color: #856404; margin: 15px 0;">⚠️ First-time Admin Setup</h4>
-                    <div class="form-group">
-                        <label for="newAdminPassword">Create Admin Password</label>
-                        <input type="password" id="newAdminPassword" placeholder="Create a secure password">
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmAdminPassword">Confirm Password</label>
-                        <input type="password" id="confirmAdminPassword" placeholder="Confirm password">
-                    </div>
-                    <button onclick="setupAdmin()">🔒 Set Admin Password</button>
-                </div>
-            </div>
-            
-            <div class="settings-section">
-                <div class="settings-title">Calendar Integration</div>
-                
-                <div class="form-group">
-                    <label>Calendar Service</label>
-                    <select id="calendarService">
-                        <option value="google">Google Calendar</option>
-                        <option value="outlook">Outlook Calendar</option>
-                        <option value="yahoo">Yahoo Calendar</option>
-                        <option value="ics">Download ICS File (iOS/Mac)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="calendarName">Calendar Name (Optional)</label>
-                    <input type="text" id="calendarName" placeholder="Company Time Off Calendar" value="Company Time Off Calendar">
-                </div>
-                
-                <button onclick="saveCalendarSettings()">Save Calendar Settings</button>
-                
-                <div style="margin-top: 15px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 14px;">
-                    <strong>📱 iOS Setup Instructions:</strong><br>
-                    1. When you approve requests, calendar events will open automatically<br>
-                    2. For ICS files: Tap the file → "Add to Calendar" → Choose your calendar<br>
-                    3. Events will appear in your iOS Calendar app
-                </div>
-            </div>
-            
-            <div class="settings-section">
-                <div class="settings-title">App Information</div>
-                <p><strong>Version:</strong> 1.0.0</p>
-                <p><strong>Install:</strong> Add this page to your home screen for the best experience!</p>
-                <button onclick="installPWA()" id="installBtn" style="margin-top: 15px; display: none;">📱 Install App</button>
-            </div>
+            <div id="settingsAccessControl"></div>
         </div>
     </div>
     
@@ -607,7 +545,7 @@
     <script>
         // App State
         let requests = JSON.parse(localStorage.getItem('timeOffRequests') || '[]');
-        let adminSettings = JSON.parse(localStorage.getItem('adminSettings') || '{"adminEmail": "", "isAdminMode": false, "adminPasswordHash": "", "calendarService": "google", "calendarName": "Company Time Off Calendar"}');
+        let adminSettings = JSON.parse(localStorage.getItem('adminSettings') || '{"adminEmail": "drlhanna@yahoo.com", "isAdminMode": false, "adminPasswordHash": "", "calendarService": "google", "calendarName": "Company Time Off Calendar"}');
         let deferredPrompt;
         let isAdminLoggedIn = sessionStorage.getItem('adminSession') === 'true';
 
@@ -617,6 +555,7 @@
             renderRequests();
             renderPendingRequests();
             checkAdminSession();
+            renderSettingsTab();
             
             // Set minimum dates to today
             const today = new Date().toISOString().split('T')[0];
@@ -631,7 +570,6 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('installBtn').style.display = 'block';
         });
 
         function installPWA() {
@@ -662,8 +600,14 @@
             }
         }
 
-        // Tab Navigation
+        // Tab Navigation with Access Control
         function showTab(tabName) {
+            // Check access control for settings tab
+            if (tabName === 'settings' && !isAdminLoggedIn) {
+                showAlert('Access Denied', 'You must be logged in as admin to access settings.');
+                return;
+            }
+            
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
@@ -684,7 +628,105 @@
             }
         }
 
-        // Form Submission
+        // Settings Tab Rendering with Access Control
+        function renderSettingsTab() {
+            const container = document.getElementById('settingsAccessControl');
+            
+            if (!isAdminLoggedIn) {
+                container.innerHTML = `
+                    <div class="access-denied">
+                        <h3>🔒 Access Restricted</h3>
+                        <p>Settings access is restricted to administrators only. Please login as admin to access these settings.</p>
+                        
+                        <div id="adminLoginSection" style="margin-top: 20px;">
+                            ${!adminSettings.adminPasswordHash ? `
+                                <div id="setupAdminSection">
+                                    <h4 style="color: #856404; margin: 15px 0;">⚠️ First-time Admin Setup</h4>
+                                    <div class="form-group">
+                                        <label for="newAdminPassword">Create Admin Password</label>
+                                        <input type="password" id="newAdminPassword" placeholder="Create a secure password">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirmAdminPassword">Confirm Password</label>
+                                        <input type="password" id="confirmAdminPassword" placeholder="Confirm password">
+                                    </div>
+                                    <button onclick="setupAdmin()">🔒 Set Admin Password</button>
+                                </div>
+                            ` : `
+                                <div class="form-group">
+                                    <label for="adminPassword">Admin Password</label>
+                                    <input type="password" id="adminPassword" placeholder="Enter admin password">
+                                </div>
+                                <button onclick="adminLogin()">🔓 Login as Admin</button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="settings-section">
+                        <div class="settings-title">Admin Configuration</div>
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #d4edda; border-radius: 8px; margin: 10px 0;">
+                            <span style="color: #155724;">✅ Logged in as Admin</span>
+                            <button onclick="adminLogout()" style="width: auto; padding: 8px 16px; background: #dc3545;">Logout</button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="adminEmail">Admin Email for Notifications</label>
+                            <input type="email" id="adminEmail" value="${adminSettings.adminEmail}" readonly>
+                            <small style="color: #666; font-size: 12px;">Email notifications will be sent to: drlhanna@yahoo.com</small>
+                        </div>
+                        
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <strong>📧 Email Notifications:</strong><br>
+                            When employees submit time off requests, an email will automatically be sent to <strong>drlhanna@yahoo.com</strong> with all the request details.
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-title">Calendar Integration</div>
+                        
+                        <div class="form-group">
+                            <label>Calendar Service</label>
+                            <select id="calendarService">
+                                <option value="google">Google Calendar</option>
+                                <option value="outlook">Outlook Calendar</option>
+                                <option value="yahoo">Yahoo Calendar</option>
+                                <option value="ics">Download ICS File (iOS/Mac)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="calendarName">Calendar Name (Optional)</label>
+                            <input type="text" id="calendarName" placeholder="Company Time Off Calendar" value="${adminSettings.calendarName || 'Company Time Off Calendar'}">
+                        </div>
+                        
+                        <button onclick="saveCalendarSettings()">Save Calendar Settings</button>
+                        
+                        <div style="margin-top: 15px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 14px;">
+                            <strong>📱 iOS Setup Instructions:</strong><br>
+                            1. When you approve requests, calendar events will open automatically<br>
+                            2. For ICS files: Tap the file → "Add to Calendar" → Choose your calendar<br>
+                            3. Events will appear in your iOS Calendar app
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-title">App Information</div>
+                        <p><strong>Version:</strong> 1.0.0</p>
+                        <p><strong>Install:</strong> Add this page to your home screen for the best experience!</p>
+                        ${deferredPrompt ? '<button onclick="installPWA()" id="installBtn" style="margin-top: 15px;">📱 Install App</button>' : ''}
+                    </div>
+                `;
+                
+                // Load current settings values
+                document.getElementById('calendarService').value = adminSettings.calendarService || 'google';
+                document.getElementById('calendarName').value = adminSettings.calendarName || 'Company Time Off Calendar';
+            }
+        }
+
+        // Form Submission with Email Notification
         document.getElementById('requestForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -731,7 +773,7 @@
             requests.push(formData);
             saveData();
             
-            // Send email notification
+            // Send email notification to admin
             sendAdminNotification(formData);
             
             // Clear form
@@ -740,38 +782,50 @@
             document.getElementById('ptoHours').value = 8;
             
             // Show success message
-            showAlert('Success', 'Your time off request has been submitted and the admin has been notified.');
+            showAlert('Success', 'Your time off request has been submitted successfully! An email notification has been sent to the admin at drlhanna@yahoo.com');
             
             // Refresh displays
             renderRequests();
             renderPendingRequests();
         });
 
-        // Email Notification
+        // Enhanced Email Notification Function
         function sendAdminNotification(request) {
-            if (!adminSettings.adminEmail) {
-                console.log('No admin email configured');
-                return;
+            const adminEmail = 'drlhanna@yahoo.com'; // Fixed admin email
+            
+            const subject = `🔔 New Time Off Request - ${request.employeeName}`;
+            const body = `Dear Admin,
+
+A new time off request has been submitted and requires your review:
+
+📋 EMPLOYEE DETAILS:
+• Name: ${request.employeeName}
+• Email: ${request.employeeEmail}
+
+📅 REQUEST DETAILS:
+• Start Date: ${new Date(request.startDate).toLocaleDateString()}
+• End Date: ${new Date(request.endDate).toLocaleDateString()}
+• PTO Hours Requested: ${request.ptoHours} hours
+• Type of Time Off: ${request.timeOffTypes.join(', ')}
+• Additional Details: ${request.reason || 'None provided'}
+
+📤 Submission Date: ${new Date(request.dateSubmitted).toLocaleDateString()}
+
+Please log into the Time Off Request system to approve or deny this request.
+
+Best regards,
+Time Off Request System`;
+            
+            // Create and open mailto link
+            const mailtoLink = `mailto:${adminEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            try {
+                // Open email client
+                window.location.href = mailtoLink;
+                console.log('Email notification sent to:', adminEmail);
+            } catch (error) {
+                console.error('Error sending email notification:', error);
             }
-            
-            const subject = `New Time Off Request - ${request.employeeName}`;
-            const body = `A new time off request has been submitted:
-
-Employee: ${request.employeeName}
-Email: ${request.employeeEmail}
-Start Date: ${new Date(request.startDate).toLocaleDateString()}
-End Date: ${new Date(request.endDate).toLocaleDateString()}
-PTO Hours Requested: ${request.ptoHours} hours
-Type of Time Off: ${request.timeOffTypes.join(', ')}
-Additional Details: ${request.reason || 'None provided'}
-
-Please review and approve/deny this request in the time off app.`;
-            
-            // Create mailto link
-            const mailtoLink = `mailto:${adminSettings.adminEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-            
-            // Open email client
-            window.location.href = mailtoLink;
         }
 
         // Render Functions
@@ -890,225 +944,3 @@ Please review and approve/deny this request in the time off app.`;
             const eventDetails = `Type: ${timeOffType}\nPTO Hours: ${request.ptoHours || 0} hours\nEmployee Email: ${request.employeeEmail}\nAdditional Details: ${request.reason || 'None provided'}\nApproved on: ${new Date().toLocaleDateString()}`;
             
             // Format dates for calendar URL (YYYYMMDD format)
-            const formatDate = (date) => {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}${month}${day}`;
-            };
-            
-            const startDateFormatted = formatDate(startDate);
-            const endDateFormatted = formatDate(endDate);
-            
-            const calendarService = adminSettings.calendarService || 'google';
-            
-            let calendarUrl;
-            
-            switch (calendarService) {
-                case 'google':
-                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(eventDetails)}&location=${encodeURIComponent('Company')}`;
-                    break;
-                    
-                case 'outlook':
-                    calendarUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&body=${encodeURIComponent(eventDetails)}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&allday=true`;
-                    break;
-                    
-                case 'yahoo':
-                    calendarUrl = `https://calendar.yahoo.com/?v=60&view=d&type=20&title=${encodeURIComponent(eventTitle)}&st=${startDateFormatted}&dur=allday&desc=${encodeURIComponent(eventDetails)}`;
-                    break;
-                    
-                case 'ics':
-                    downloadICSFile(request, eventTitle, eventDetails, startDate, endDate);
-                    return;
-                    
-                default:
-                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(eventDetails)}`;
-            }
-            
-            // Open calendar in new tab/window
-            window.open(calendarUrl, '_blank');
-        }
-        
-        function downloadICSFile(request, title, details, startDate, endDate) {
-            // Create ICS file content
-            const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Vacation App//EN
-CALSCALE:GREGORIAN
-METHOD:PUBLISH
-BEGIN:VEVENT
-UID:${request.id}-${Date.now()}@vacation-app.com
-DTSTART;VALUE=DATE:${startDate.toISOString().slice(0, 10).replace(/-/g, '')}
-DTEND;VALUE=DATE:${endDate.toISOString().slice(0, 10).replace(/-/g, '')}
-SUMMARY:${title}
-DESCRIPTION:${details.replace(/\n/g, '\\n')}
-STATUS:CONFIRMED
-SEQUENCE:0
-BEGIN:VALARM
-TRIGGER:-P1D
-DESCRIPTION:${request.employeeName} vacation starts tomorrow
-ACTION:DISPLAY
-END:VALARM
-END:VEVENT
-END:VCALENDAR`;
-            
-            // Create and download the file
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = `${request.employeeName}-vacation-${request.startDate}.ics`;
-            
-            // Trigger download
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Show instructions for iOS
-            showAlert('Calendar File Downloaded', 'The calendar file has been downloaded. On iOS: Open the file, then tap "Add to Calendar" to import it into your iOS Calendar app.');
-        }
-
-        // Settings Functions
-        function loadSettings() {
-            document.getElementById('adminEmail').value = adminSettings.adminEmail || '';
-            document.getElementById('calendarService').value = adminSettings.calendarService || 'google';
-            document.getElementById('calendarName').value = adminSettings.calendarName || 'Company Time Off Calendar';
-            checkAdminSetup();
-        }
-
-        function checkAdminSetup() {
-            const setupSection = document.getElementById('setupAdminSection');
-            const loginSection = document.getElementById('adminLoginSection');
-            const loggedInSection = document.getElementById('adminLoggedIn');
-            
-            if (!adminSettings.adminPasswordHash) {
-                // No admin password set - show setup
-                setupSection.style.display = 'block';
-                loginSection.style.display = 'none';
-                loggedInSection.style.display = 'none';
-            } else if (isAdminLoggedIn) {
-                // Admin logged in
-                setupSection.style.display = 'none';
-                loginSection.style.display = 'none';
-                loggedInSection.style.display = 'block';
-                document.getElementById('adminTab').style.display = 'block';
-            } else {
-                // Admin password exists but not logged in
-                setupSection.style.display = 'none';
-                loginSection.style.display = 'block';
-                loggedInSection.style.display = 'none';
-                document.getElementById('adminTab').style.display = 'none';
-            }
-        }
-
-        function checkAdminSession() {
-            isAdminLoggedIn = sessionStorage.getItem('adminSession') === 'true';
-            checkAdminSetup();
-        }
-
-        async function hashPassword(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hash))
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('');
-        }
-
-        async function setupAdmin() {
-            const password = document.getElementById('newAdminPassword').value;
-            const confirmPassword = document.getElementById('confirmAdminPassword').value;
-            
-            if (password !== confirmPassword) {
-                showAlert('Error', 'Passwords do not match.');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showAlert('Error', 'Password must be at least 6 characters long.');
-                return;
-            }
-            
-            adminSettings.adminPasswordHash = await hashPassword(password);
-            saveData();
-            
-            // Clear password fields
-            document.getElementById('newAdminPassword').value = '';
-            document.getElementById('confirmAdminPassword').value = '';
-            
-            showAlert('Success', 'Admin password has been set successfully. You can now login as admin.');
-            checkAdminSetup();
-        }
-
-        async function adminLogin() {
-            const password = document.getElementById('adminPassword').value;
-            
-            if (!password) {
-                showAlert('Error', 'Please enter the admin password.');
-                return;
-            }
-            
-            const passwordHash = await hashPassword(password);
-            
-            if (passwordHash === adminSettings.adminPasswordHash) {
-                isAdminLoggedIn = true;
-                sessionStorage.setItem('adminSession', 'true');
-                document.getElementById('adminPassword').value = '';
-                checkAdminSetup();
-                renderPendingRequests(); // Refresh admin view
-                showAlert('Success', 'Successfully logged in as admin.');
-            } else {
-                showAlert('Error', 'Incorrect admin password.');
-            }
-        }
-
-        function adminLogout() {
-            isAdminLoggedIn = false;
-            sessionStorage.removeItem('adminSession');
-            checkAdminSetup();
-            
-            // If currently on admin tab, switch to list tab
-            if (document.getElementById('admin').classList.contains('active')) {
-                showTab('list');
-                document.querySelector('[onclick="showTab(\'list\')"]').classList.add('active');
-            }
-            
-            showAlert('Success', 'Successfully logged out.');
-        }
-
-        function saveAdminEmail() {
-            const email = document.getElementById('adminEmail').value;
-            adminSettings.adminEmail = email;
-            saveData();
-            showAlert('Success', 'Admin email has been saved successfully.');
-        }
-
-        function saveCalendarSettings() {
-            adminSettings.calendarService = document.getElementById('calendarService').value;
-            adminSettings.calendarName = document.getElementById('calendarName').value;
-            saveData();
-            showAlert('Success', 'Calendar settings have been saved successfully.');
-        }
-
-        // Utility Functions
-        function saveData() {
-            localStorage.setItem('timeOffRequests', JSON.stringify(requests));
-            localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
-        }
-
-        function showAlert(title, message) {
-            document.getElementById('alertTitle').textContent = title;
-            document.getElementById('alertMessage').textContent = message;
-            document.getElementById('alertOverlay').classList.remove('hidden');
-            document.getElementById('alertModal').classList.remove('hidden');
-        }
-
-        function closeAlert() {
-            document.getElementById('alertOverlay').classList.add('hidden');
-            document.getElementById('alertModal').classList.add('hidden');
-        }
-
-        // Close alert when clicking overlay
-        document.getElementById('alertOverlay').addEventListener('click', closeAlert);
-    </script>
-</body>
-</html>
