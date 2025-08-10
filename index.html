@@ -323,6 +323,7 @@
         .hours-buttons {
             display: flex;
             gap: 5px;
+            flex-wrap: wrap;
         }
         
         .hours-btn {
@@ -351,6 +352,24 @@
             border-radius: 10px;
             text-align: center;
             margin: 20px 0;
+        }
+        
+        .admin-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 8px;
+            margin: 10px 0;
+            color: #155724;
+        }
+        
+        .logout-btn {
+            width: auto;
+            padding: 8px 16px;
+            background: #dc3545;
+            font-size: 14px;
         }
         
         @media (max-width: 600px) {
@@ -387,6 +406,12 @@
             
             h1 {
                 font-size: 20px;
+            }
+            
+            .admin-status {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
             }
         }
     </style>
@@ -543,11 +568,28 @@
     </div>
 
     <script>
-        // App State
-        let requests = JSON.parse(localStorage.getItem('timeOffRequests') || '[]');
-        let adminSettings = JSON.parse(localStorage.getItem('adminSettings') || '{"adminEmail": "drlhanna@yahoo.com", "isAdminMode": false, "adminPasswordHash": "", "calendarService": "google", "calendarName": "Company Time Off Calendar"}');
+        // App State - Using in-memory storage instead of localStorage for Claude.ai compatibility
+        let requests = [];
+        let adminSettings = {
+            adminEmail: "drlhanna@yahoo.com",
+            isAdminMode: false,
+            adminPasswordHash: "",
+            calendarService: "google",
+            calendarName: "Company Time Off Calendar"
+        };
         let deferredPrompt;
-        let isAdminLoggedIn = sessionStorage.getItem('adminSession') === 'true';
+        let isAdminLoggedIn = false;
+
+        // Simple hash function for password
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return hash.toString();
+        }
 
         // Initialize App
         document.addEventListener('DOMContentLoaded', function() {
@@ -584,6 +626,17 @@
             }
         }
 
+        // Data Management
+        function saveData() {
+            // In a real app, this would save to a database
+            console.log('Data saved:', { requests, adminSettings });
+        }
+
+        function loadSettings() {
+            // In a real app, this would load from a database
+            console.log('Settings loaded');
+        }
+
         // PTO Hours Functions
         function setPTOHours(hours) {
             document.getElementById('ptoHours').value = hours;
@@ -591,7 +644,6 @@
 
         function validatePTOHours() {
             const ptoHours = parseInt(document.getElementById('ptoHours').value);
-            // Allow multiples of 4 hours instead of just 8
             if (ptoHours % 4 !== 0) {
                 document.getElementById('ptoHours').value = Math.round(ptoHours / 4) * 4;
             }
@@ -600,11 +652,11 @@
             }
         }
 
-        // Tab Navigation with Access Control
+        // Tab Navigation
         function showTab(tabName) {
-            // Check access control for settings tab
-            if (tabName === 'settings' && !isAdminLoggedIn) {
-                showAlert('Access Denied', 'You must be logged in as admin to access settings.');
+            // Check access control for admin and settings tabs
+            if ((tabName === 'settings' || tabName === 'admin') && !isAdminLoggedIn) {
+                showAlert('Access Denied', 'You must be logged in as admin to access this section.');
                 return;
             }
             
@@ -628,7 +680,63 @@
             }
         }
 
-        // Settings Tab Rendering with Access Control
+        // Admin Authentication Functions
+        function setupAdmin() {
+            const newPassword = document.getElementById('newAdminPassword').value;
+            const confirmPassword = document.getElementById('confirmAdminPassword').value;
+            
+            if (!newPassword || newPassword.length < 6) {
+                showAlert('Error', 'Password must be at least 6 characters long.');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showAlert('Error', 'Passwords do not match.');
+                return;
+            }
+            
+            adminSettings.adminPasswordHash = simpleHash(newPassword);
+            saveData();
+            
+            showAlert('Success', 'Admin password has been set successfully! You can now login.');
+            renderSettingsTab();
+        }
+
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (!password) {
+                showAlert('Error', 'Please enter the admin password.');
+                return;
+            }
+            
+            if (simpleHash(password) === adminSettings.adminPasswordHash) {
+                isAdminLoggedIn = true;
+                document.getElementById('adminTab').style.display = 'block';
+                showAlert('Success', 'Successfully logged in as admin!');
+                renderSettingsTab();
+                renderPendingRequests();
+            } else {
+                showAlert('Error', 'Invalid admin password.');
+            }
+        }
+
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            document.getElementById('adminTab').style.display = 'none';
+            showAlert('Success', 'Logged out successfully.');
+            renderSettingsTab();
+            showTab('request'); // Redirect to main tab
+        }
+
+        function checkAdminSession() {
+            // Check if admin should be logged in (for demo purposes)
+            if (isAdminLoggedIn) {
+                document.getElementById('adminTab').style.display = 'block';
+            }
+        }
+
+        // Settings Tab Rendering
         function renderSettingsTab() {
             const container = document.getElementById('settingsAccessControl');
             
@@ -667,20 +775,20 @@
                     <div class="settings-section">
                         <div class="settings-title">Admin Configuration</div>
                         
-                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: #d4edda; border-radius: 8px; margin: 10px 0;">
-                            <span style="color: #155724;">✅ Logged in as Admin</span>
-                            <button onclick="adminLogout()" style="width: auto; padding: 8px 16px; background: #dc3545;">Logout</button>
+                        <div class="admin-status">
+                            <span>✅ Logged in as Admin</span>
+                            <button onclick="adminLogout()" class="logout-btn">Logout</button>
                         </div>
                         
                         <div class="form-group">
                             <label for="adminEmail">Admin Email for Notifications</label>
                             <input type="email" id="adminEmail" value="${adminSettings.adminEmail}" readonly>
-                            <small style="color: #666; font-size: 12px;">Email notifications will be sent to: drlhanna@yahoo.com</small>
+                            <small style="color: #666; font-size: 12px;">Email notifications will be sent to: ${adminSettings.adminEmail}</small>
                         </div>
                         
                         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
                             <strong>📧 Email Notifications:</strong><br>
-                            When employees submit time off requests, an email will automatically be sent to <strong>drlhanna@yahoo.com</strong> with all the request details.
+                            When employees submit time off requests, an email will automatically be sent to <strong>${adminSettings.adminEmail}</strong> with all the request details.
                         </div>
                     </div>
                     
@@ -689,7 +797,7 @@
                         
                         <div class="form-group">
                             <label>Calendar Service</label>
-                            <select id="calendarService">
+                            <select id="calendarService" onchange="updateCalendarService()">
                                 <option value="google">Google Calendar</option>
                                 <option value="outlook">Outlook Calendar</option>
                                 <option value="yahoo">Yahoo Calendar</option>
@@ -699,7 +807,7 @@
                         
                         <div class="form-group">
                             <label for="calendarName">Calendar Name (Optional)</label>
-                            <input type="text" id="calendarName" placeholder="Company Time Off Calendar" value="${adminSettings.calendarName || 'Company Time Off Calendar'}">
+                            <input type="text" id="calendarName" placeholder="Company Time Off Calendar" value="${adminSettings.calendarName || 'Company Time Off Calendar'}" onchange="updateCalendarName()">
                         </div>
                         
                         <button onclick="saveCalendarSettings()">Save Calendar Settings</button>
@@ -726,7 +834,25 @@
             }
         }
 
-        // Form Submission with Email Notification
+        // Calendar Settings Functions
+        function updateCalendarService() {
+            adminSettings.calendarService = document.getElementById('calendarService').value;
+            saveData();
+        }
+
+        function updateCalendarName() {
+            adminSettings.calendarName = document.getElementById('calendarName').value;
+            saveData();
+        }
+
+        function saveCalendarSettings() {
+            adminSettings.calendarService = document.getElementById('calendarService').value;
+            adminSettings.calendarName = document.getElementById('calendarName').value;
+            saveData();
+            showAlert('Success', 'Calendar settings saved successfully!');
+        }
+
+        // Form Submission
         document.getElementById('requestForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -782,16 +908,16 @@
             document.getElementById('ptoHours').value = 8;
             
             // Show success message
-            showAlert('Success', 'Your time off request has been submitted successfully! An email notification has been sent to the admin at drlhanna@yahoo.com');
+            showAlert('Success', `Your time off request has been submitted successfully! An email notification has been sent to the admin at ${adminSettings.adminEmail}`);
             
             // Refresh displays
             renderRequests();
             renderPendingRequests();
         });
 
-        // Enhanced Email Notification Function
-        function sendAdminNotification(request) {
-            const adminEmail = 'drlhanna@yahoo.com'; // Fixed admin email
+        // Email Notification Function
+        function sendEmailNotification(request) {
+            const adminEmail = adminSettings.adminEmail;
             
             const subject = `🔔 New Time Off Request - ${request.employeeName}`;
             const body = `Dear Admin,
@@ -820,8 +946,7 @@ Time Off Request System`;
             const mailtoLink = `mailto:${adminEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             
             try {
-                // Open email client
-                window.location.href = mailtoLink;
+                window.open(mailtoLink, '_blank');
                 console.log('Email notification sent to:', adminEmail);
             } catch (error) {
                 console.error('Error sending email notification:', error);
@@ -884,63 +1009,3 @@ Time Off Request System`;
                 `;
                 return;
             }
-            
-            container.innerHTML = pendingRequests.map(request => `
-                <div class="request-card">
-                    <div class="request-header">
-                        <div class="employee-name">${request.employeeName}</div>
-                        <div class="status-badge status-${request.status}">${request.status}</div>
-                    </div>
-                    <div class="request-details">📧 ${request.employeeEmail}</div>
-                    <div class="request-details">📅 ${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}</div>
-                    <div class="request-details">⏰ ${request.ptoHours || 0} PTO hours</div>
-                    <div class="request-details">🏷️ ${request.timeOffTypes ? request.timeOffTypes.join(', ') : 'Legacy request'}</div>
-                    ${request.reason ? `<div class="request-details">📝 ${request.reason}</div>` : ''}
-                    <div class="request-details">📤 Submitted: ${new Date(request.dateSubmitted).toLocaleDateString()}</div>
-                    
-                    <div class="admin-actions">
-                        <button class="btn-approve" onclick="updateRequestStatus('${request.id}', 'approved')">
-                            ✅ Approve
-                        </button>
-                        <button class="btn-deny" onclick="updateRequestStatus('${request.id}', 'denied')">
-                            ❌ Deny
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Admin Functions
-        function updateRequestStatus(requestId, status) {
-            // Check if user is logged in as admin
-            if (!isAdminLoggedIn) {
-                showAlert('Access Denied', 'You must be logged in as admin to approve/deny requests.');
-                return;
-            }
-            
-            const requestIndex = requests.findIndex(r => r.id === requestId);
-            if (requestIndex !== -1) {
-                requests[requestIndex].status = status;
-                saveData();
-                
-                if (status === 'approved') {
-                    addToCalendar(requests[requestIndex]);
-                }
-                
-                renderRequests();
-                renderPendingRequests();
-                
-                showAlert('Success', `Request has been ${status}.`);
-            }
-        }
-
-        function addToCalendar(request) {
-            const startDate = new Date(request.startDate);
-            const endDate = new Date(request.endDate);
-            endDate.setDate(endDate.getDate() + 1); // Add one day for all-day event
-            
-            const timeOffType = request.timeOffTypes ? request.timeOffTypes.join(', ') : 'Time Off';
-            const eventTitle = `${request.employeeName} - ${timeOffType}`;
-            const eventDetails = `Type: ${timeOffType}\nPTO Hours: ${request.ptoHours || 0} hours\nEmployee Email: ${request.employeeEmail}\nAdditional Details: ${request.reason || 'None provided'}\nApproved on: ${new Date().toLocaleDateString()}`;
-            
-            // Format dates for calendar URL (YYYYMMDD format)
