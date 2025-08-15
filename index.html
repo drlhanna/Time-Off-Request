@@ -1009,3 +1009,143 @@ Time Off Request System`;
                 `;
                 return;
             }
+            
+            container.innerHTML = pendingRequests.map(request => `
+                <div class="request-card">
+                    <div class="request-header">
+                        <div class="employee-name">${request.employeeName}</div>
+                        <div class="status-badge status-${request.status}">${request.status}</div>
+                    </div>
+                    <div class="request-details">📧 ${request.employeeEmail}</div>
+                    <div class="request-details">📅 ${new Date(request.startDate).toLocaleDateString()} - ${new Date(request.endDate).toLocaleDateString()}</div>
+                    <div class="request-details">⏰ ${request.ptoHours || 0} PTO hours</div>
+                    <div class="request-details">🏷️ ${request.timeOffTypes ? request.timeOffTypes.join(', ') : 'Legacy request'}</div>
+                    ${request.reason ? `<div class="request-details">📝 ${request.reason}</div>` : ''}
+                    <div class="request-details">📤 Submitted: ${new Date(request.dateSubmitted).toLocaleDateString()}</div>
+                    
+                    <div class="admin-actions">
+                        <button class="btn-approve" onclick="updateRequestStatus('${request.id}', 'approved')">
+                            ✅ Approve
+                        </button>
+                        <button class="btn-deny" onclick="updateRequestStatus('${request.id}', 'denied')">
+                            ❌ Deny
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Admin Functions
+        function updateRequestStatus(requestId, status) {
+            // Check if user is logged in as admin
+            if (!isAdminLoggedIn) {
+                showAlert('Access Denied', 'You must be logged in as admin to approve/deny requests.');
+                return;
+            }
+            
+            const requestIndex = requests.findIndex(r => r.id === requestId);
+            if (requestIndex !== -1) {
+                requests[requestIndex].status = status;
+                saveData();
+                
+                if (status === 'approved') {
+                    addToCalendar(requests[requestIndex]);
+                }
+                
+                renderRequests();
+                renderPendingRequests();
+                
+                showAlert('Success', `Request has been ${status}.`);
+            }
+        }
+
+        function addToCalendar(request) {
+            const startDate = new Date(request.startDate);
+            const endDate = new Date(request.endDate);
+            endDate.setDate(endDate.getDate() + 1); // Add one day for all-day event
+            
+            const timeOffType = request.timeOffTypes ? request.timeOffTypes.join(', ') : 'Time Off';
+            const eventTitle = `${request.employeeName} - ${timeOffType}`;
+            const eventDetails = `Type: ${timeOffType}\nPTO Hours: ${request.ptoHours || 0} hours\nEmployee Email: ${request.employeeEmail}\nAdditional Details: ${request.reason || 'None provided'}\nApproved on: ${new Date().toLocaleDateString()}`;
+            
+            // Format dates for calendar URL (YYYYMMDD format)
+            const formatDate = (date) => {
+                return date.toISOString().split('T')[0].replace(/-/g, '');
+            };
+            
+            const startDateFormatted = formatDate(startDate);
+            const endDateFormatted = formatDate(endDate);
+            
+            let calendarUrl = '';
+            
+            switch (adminSettings.calendarService) {
+                case 'google':
+                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(eventDetails)}&sf=true&output=xml`;
+                    break;
+                case 'outlook':
+                    calendarUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&startdt=${startDate.toISOString()}&enddt=${endDate.toISOString()}&body=${encodeURIComponent(eventDetails)}`;
+                    break;
+                case 'yahoo':
+                    calendarUrl = `https://calendar.yahoo.com/?v=60&view=d&type=20&title=${encodeURIComponent(eventTitle)}&st=${startDateFormatted}&dur=allday&desc=${encodeURIComponent(eventDetails)}`;
+                    break;
+                case 'ics':
+                    generateICSFile(request, eventTitle, eventDetails, startDate, endDate);
+                    return;
+                default:
+                    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=${startDateFormatted}/${endDateFormatted}&details=${encodeURIComponent(eventDetails)}&sf=true&output=xml`;
+            }
+            
+            // Open calendar service
+            window.open(calendarUrl, '_blank');
+        }
+
+        function generateICSFile(request, eventTitle, eventDetails, startDate, endDate) {
+            const formatICSDate = (date) => {
+                return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+            
+            const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Time Off Request System//EN
+BEGIN:VEVENT
+UID:${request.id}@timeoffrequest.com
+DTSTAMP:${formatICSDate(new Date())}
+DTSTART;VALUE=DATE:${startDate.toISOString().split('T')[0].replace(/-/g, '')}
+DTEND;VALUE=DATE:${endDate.toISOString().split('T')[0].replace(/-/g, '')}
+SUMMARY:${eventTitle}
+DESCRIPTION:${eventDetails.replace(/\n/g, '\\n')}
+END:VEVENT
+END:VCALENDAR`;
+
+            // Create and download ICS file
+            const blob = new Blob([icsContent], { type: 'text/calendar' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${request.employeeName}_TimeOff_${request.startDate}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            showAlert('Success', 'ICS calendar file downloaded! You can add it to your iOS Calendar app.');
+        }
+
+        // Alert Functions
+        function showAlert(title, message) {
+            document.getElementById('alertTitle').textContent = title;
+            document.getElementById('alertMessage').textContent = message;
+            document.getElementById('alertOverlay').classList.remove('hidden');
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function closeAlert() {
+            document.getElementById('alertOverlay').classList.add('hidden');
+            document.getElementById('alertModal').classList.add('hidden');
+        }
+
+        // Close alert when clicking overlay
+        document.getElementById('alertOverlay').addEventListener('click', closeAlert);
+    </script>
+</body>
+</html>
