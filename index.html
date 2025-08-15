@@ -654,8 +654,8 @@
 
         // Tab Navigation
         function showTab(tabName) {
-            // Check access control for admin and settings tabs
-            if ((tabName === 'settings' || tabName === 'admin') && !isAdminLoggedIn) {
+            // Check access control for admin tab only - settings tab should be accessible for initial setup
+            if (tabName === 'admin' && !isAdminLoggedIn) {
                 showAlert('Access Denied', 'You must be logged in as admin to access this section.');
                 return;
             }
