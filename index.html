@@ -573,7 +573,8 @@
         let adminSettings = {
             adminEmail: "drlhanna@yahoo.com",
             isAdminMode: false,
-            adminPasswordHash: "",
+            adminPasswordHash: null, // Changed to null initially
+            adminPasswordSet: false, // Add explicit flag to track setup state
             calendarService: "google",
             calendarName: "Company Time Off Calendar"
         };
@@ -696,6 +697,7 @@
             }
             
             adminSettings.adminPasswordHash = simpleHash(newPassword);
+            adminSettings.adminPasswordSet = true; // Mark as set
             saveData();
             
             showAlert('Success', 'Admin password has been set successfully! You can now login.');
@@ -785,12 +787,12 @@
                         <p>Settings access is restricted to administrators only. Please login as admin to access these settings.</p>
                         
                         <div id="adminLoginSection" style="margin-top: 20px;">
-                            ${!adminSettings.adminPasswordHash ? `
+                            ${!adminSettings.adminPasswordSet ? `
                                 <div id="setupAdminSection">
                                     <h4 style="color: #856404; margin: 15px 0;">⚠️ First-time Admin Setup</h4>
                                     <div class="form-group">
                                         <label for="newAdminPassword">Create Admin Password</label>
-                                        <input type="password" id="newAdminPassword" placeholder="Create a secure password">
+                                        <input type="password" id="newAdminPassword" placeholder="Create a secure password (min 6 characters)">
                                     </div>
                                     <div class="form-group">
                                         <label for="confirmAdminPassword">Confirm Password</label>
@@ -838,7 +840,7 @@
                         
                         <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin: 15px 0;">
                             <strong>🔐 Password Security:</strong><br>
-                            Admin password is configured and secure. Contact your system administrator if you need to reset the password.
+                            Admin password is configured and secure. Use the form below to change your password.
                         </div>
                         
                         <div class="form-group">
@@ -881,7 +883,7 @@
                     
                     <div class="settings-section">
                         <div class="settings-title">App Information</div>
-                        <p><strong>Version:</strong> 1.0.0</p>
+                        <p><strong>Version:</strong> 1.0.1</p>
                         <p><strong>Install:</strong> Add this page to your home screen for the best experience!</p>
                         ${deferredPrompt ? '<button onclick="installPWA()" id="installBtn" style="margin-top: 15px;">📱 Install App</button>' : ''}
                     </div>
